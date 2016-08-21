@@ -1,0 +1,93 @@
+package tests
+
+// VerifySequence(secureLog *msgserver.MsgServer, size int, correct bool)
+
+import (
+	message "github.com/cryptobrains/CryptoLog/message"
+	msgserver "github.com/cryptobrains/CryptoLog/msgserver"
+	"errors"
+	"fmt"
+	"strconv"
+)
+
+func VerifySequence(secureLog *msgserver.MsgServer, size int, correct bool) error {
+
+	var wrong int
+
+	if correct {wrong = size+1} else {wrong = size/2}
+
+	fillSequence(secureLog, size, wrong)
+
+	lastLogId := msgserver.GetLastLogId()
+
+	count, err := verifyFromId(lastLogId, 0)
+	if err != nil {
+		fmt.Println("\n\nSequence checking has failed with ", err)
+		fmt.Println("\n\n")
+		return err
+	} else if count != size {
+		fmt.Println("\n\nSequence checking has failed, wrong message is in")
+		fmt.Println("\n\n")
+		fmt.Println(count, size)
+		return errors.New("Wrong message is in")
+	}
+
+	fmt.Println("\n\nSequence checking has passed!")
+	fmt.Println("\n\n")
+
+	return nil
+}
+
+func verifyFromId(id string, count int) (int, error) {
+
+	if id == msgserver.InitialPrev() {return count, nil}
+
+	msg, err := message.ReadMsgFromDb(id)
+	if err != nil {
+		fmt.Println("Not found "+id)
+		fmt.Println(err)
+		return count, err
+	}
+
+	valid := msg.VerifyPayload()
+	if !valid {
+		return count, errors.New("Invalid DSA!")
+	}
+
+	payload := msg.Payload
+	previousLogId := payload.PreviousLogId
+
+	return verifyFromId(previousLogId, count + 1)
+
+}
+
+func fillSequence(secureLog *msgserver.MsgServer, size, wrong int) {
+
+	secureLog.Start()
+
+	wrongLogMsg := message.NewLogMessage( 9000, "Param Wrong" )
+	wrongMsg := &message.Message{
+		Id: "WrongId",
+		Payload: *wrongLogMsg,
+	}
+
+	for i := 0; i < size; i++ {
+
+		var fakeMessage *message.Message
+
+		if i == wrong {
+			fmt.Println("Writing wrong message!")
+			fakeMessage = wrongMsg
+		} else {
+
+			fakeLogMsg := message.NewLogMessage( i, "Param " + strconv.Itoa (i * 98734 ) )
+
+			fakeMessage = message.MakeMessage(fakeLogMsg)
+		}
+
+		secureLog.SendMsg(fakeMessage)
+	}
+
+	fmt.Println("Fill ok")
+
+}
