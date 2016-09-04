@@ -12,7 +12,6 @@ type AlivePipe struct {
 }
 
 const TIMEOUT int = 500; // waiting responses from pipe timeout
-//const PATH string = "/tmp/securelog_ipc/alive_query/"
 var PATH string
 
 var canWork	chan bool
@@ -43,11 +42,11 @@ func (pipe *AlivePipe) waitForAliveQuery(){
 				continue
 			}
 
-			log.Printf("Query is received from %s to %s, content: %s\n", inbox.From, inbox.To, inbox.Message.(string))
+			//log.Printf("Query is received from %s to %s, content: %s\n", inbox.From, inbox.To, inbox.Message.(string))
 			query := inbox.Message.(string)
 
 			if query != "ALIVE_QUERY" {
-				log.Println("Unknown query: ", query)
+				//log.Println("Unknown query: ", query)
 				continue
 			}
 
@@ -55,7 +54,7 @@ func (pipe *AlivePipe) waitForAliveQuery(){
 
 			err = response.SendResponse()
 			if err != nil { panic(err) }
-			log.Printf("Response is sent from %s to %s, content: %s", response.From, response.To, response.Message.(string))
+			//log.Printf("Response is sent from %s to %s, content: %s", response.From, response.To, response.Message.(string))
 		}
 	}()
 }
@@ -75,13 +74,13 @@ func (pipe *AlivePipe) sendAliveQuery(pipename string) bool {
 	err := msg.SendQuery()
 	if err != nil { panic(err) }
 
-	log.Printf("Query is sent from %s to %s\n", msg.From, msg.To)
+	//log.Printf("Query is sent from %s to %s\n", msg.From, msg.To)
 
 	response, _ = pipe.ReceiveResponse()
 
 	if response == nil { return false }
 
-	log.Println("Received response from %s to %s, content: %s", response.From, response.To, response.Message.(string))
+	//log.Println("Received response from %s to %s, content: %s", response.From, response.To, response.Message.(string))
 
 	return (err == nil) && (response.From == msg.To) && (response.Message.(string) == "TRUE")
 }
