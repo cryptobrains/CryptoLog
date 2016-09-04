@@ -11,7 +11,7 @@ import (
 
 func Serve(queueName string, timeLimit, msgLimit int) {
 
-	alive.Serve() // check if one process is already running and if no start own "alive" process
+	alive.Serve("/tmp/securelog_ipc/alive_query/") // check if one process is already running and if no start own "alive" process
 
 	log.Println("CryptoLog has gone logging...")
 

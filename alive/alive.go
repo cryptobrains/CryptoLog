@@ -12,11 +12,13 @@ type AlivePipe struct {
 }
 
 const TIMEOUT int = 500; // waiting responses from pipe timeout
-const PATH string = "/tmp/securelog_ipc/alive_query/"
+//const PATH string = "/tmp/securelog_ipc/alive_query/"
+var PATH string
 
 var canWork	chan bool
 
-func Serve() {
+func Serve(path string) {
+	PATH = path
 	canWork = make(chan bool)
 	pipe := &AlivePipe{
 		ipc.NewPipe(PATH, TIMEOUT),
