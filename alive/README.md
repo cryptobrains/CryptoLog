@@ -9,6 +9,6 @@ Usage:
 	import "github.com/cryptobrains/CryptoLog/alive"
 
 	//... somewhere at the beginning ...
-	alive.Serve()
+	alive.Serve("/tmp/someworkdir/") // passing any workdir folder as a parameter, if it doesn't exist program will create it with it's parents
 
 That's all.
